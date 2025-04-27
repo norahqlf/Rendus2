@@ -1,0 +1,25 @@
+# Build outputs
+bin/
+obj/
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+*.userprefs
+
+# NuGet packages
+*.nupkg
+packages/
+
+# ReSharper
+_ReSharper.*/
+
+# Rider IDE
+.idea/
+
+# Local development files
+appsettings.Development.json
+
+# MSTest results
+TestResults/
