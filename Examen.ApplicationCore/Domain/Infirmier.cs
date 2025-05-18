@@ -8,11 +8,11 @@ namespace Examen.ApplicationCore.Domain
 {
     public class Infirmier
     {
-        public int InfirmierId { get; set; }
-        public string NomComplet { get; set; }
-        public Specialite Specialite { get; set; }
+        public string CodeInfirmier { get; set; }
+        public string Nom { get; set; }
+        public string Specialite { get; set; } // Added
 
-        // Navigation Property
         public ICollection<Bilan> Bilans { get; set; }
     }
+
 }

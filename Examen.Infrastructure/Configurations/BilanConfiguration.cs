@@ -13,20 +13,15 @@ namespace Examen.Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<Bilan> builder)
         {
-            // Définir la clé primaire composée
-            builder.HasKey(b => new { b.InfirmierId, b.PatientId, b.DatePrelevement });
+            builder.HasKey(b => new { b.CodeInfirmier, b.CodePatient, b.DatePrelevement });
 
-            // Définir la relation entre Bilan et Infirmier
             builder.HasOne(b => b.Infirmier)
                    .WithMany(i => i.Bilans)
-                   .HasForeignKey(b => b.InfirmierId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .HasForeignKey(b => b.CodeInfirmier);
 
-            // Définir la relation entre Bilan et Patient
             builder.HasOne(b => b.Patient)
                    .WithMany(p => p.Bilans)
-                   .HasForeignKey(b => b.PatientId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .HasForeignKey(b => b.CodePatient);
         }
     }
 }

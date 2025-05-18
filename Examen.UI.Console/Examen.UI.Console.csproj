@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Examen.ApplicationCore\Examen.ApplicationCore.csproj" />
     <ProjectReference Include="..\Examen.Infrastructure\Examen.Infrastructure.csproj" />
+    <ProjectReference Include="..\Examen.UI.Web\Examen.UI.Web.csproj" />
   </ItemGroup>
 
 </Project>

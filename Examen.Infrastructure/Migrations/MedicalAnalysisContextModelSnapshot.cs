@@ -4,19 +4,16 @@ using Examen.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
 namespace Examen.Infrastructure.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250427212836_LaboRomdhaniNour")]
-    partial class LaboRomdhaniNour
+    [DbContext(typeof(MedicalAnalysisContext))]
+    partial class MedicalAnalysisContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -27,11 +24,20 @@ namespace Examen.Infrastructure.Migrations
 
             modelBuilder.Entity("Examen.ApplicationCore.Domain.Analyse", b =>
                 {
-                    b.Property<int>("AnalyseId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AnalyseId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("BilanCodeInfirmier")
+                        .HasColumnType("int");
+
+                    b.Property<string>("BilanCodePatient")
+                        .HasColumnType("nvarchar(5)");
+
+                    b.Property<DateTime?>("BilanDatePrelevement")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("DureeResultat")
                         .HasColumnType("int");
@@ -39,15 +45,12 @@ namespace Examen.Infrastructure.Migrations
                     b.Property<int>("LaboratoireId")
                         .HasColumnType("int");
 
-                    b.Property<double>("PrixAnalyse")
-                        .HasColumnType("float");
-
                     b.Property<string>("TypeAnalyse")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<float>("ValeurAnalyse")
-                        .HasColumnType("real");
+                    b.Property<double>("ValeurAnalyse")
+                        .HasColumnType("float");
 
                     b.Property<float>("ValeurMaxNormale")
                         .HasColumnType("real");
@@ -55,73 +58,69 @@ namespace Examen.Infrastructure.Migrations
                     b.Property<float>("ValeurMinNormale")
                         .HasColumnType("real");
 
-                    b.HasKey("AnalyseId");
+                    b.HasKey("Id");
 
                     b.HasIndex("LaboratoireId");
+
+                    b.HasIndex("BilanCodeInfirmier", "BilanCodePatient", "BilanDatePrelevement");
 
                     b.ToTable("Analyses");
                 });
 
             modelBuilder.Entity("Examen.ApplicationCore.Domain.Bilan", b =>
                 {
-                    b.Property<int>("InfirmierId")
+                    b.Property<int>("CodeInfirmier")
                         .HasColumnType("int");
 
-                    b.Property<int>("PatientId")
-                        .HasColumnType("int");
+                    b.Property<string>("CodePatient")
+                        .HasColumnType("nvarchar(5)");
 
                     b.Property<DateTime>("DatePrelevement")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("AnalyseId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("BilanId")
-                        .HasColumnType("int");
 
                     b.Property<string>("EmailMedecin")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
                     b.Property<bool>("Paye")
                         .HasColumnType("bit");
 
-                    b.HasKey("InfirmierId", "PatientId", "DatePrelevement");
+                    b.HasKey("CodeInfirmier", "CodePatient", "DatePrelevement");
 
-                    b.HasIndex("AnalyseId");
-
-                    b.HasIndex("PatientId");
+                    b.HasIndex("CodePatient");
 
                     b.ToTable("Bilans");
                 });
 
             modelBuilder.Entity("Examen.ApplicationCore.Domain.Infirmier", b =>
                 {
-                    b.Property<int>("InfirmierId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InfirmierId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("NomComplet")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("NomComplet")
+                        .HasColumnType("int");
 
                     b.Property<int>("Specialite")
                         .HasColumnType("int");
 
-                    b.HasKey("InfirmierId");
+                    b.HasKey("Id");
 
                     b.ToTable("Infirmiers");
                 });
 
             modelBuilder.Entity("Examen.ApplicationCore.Domain.Laboratoire", b =>
                 {
-                    b.Property<int>("LaboratoireId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LaboratoireId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Intitule")
                         .IsRequired()
@@ -133,19 +132,16 @@ namespace Examen.Infrastructure.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("AdresseLabo");
 
-                    b.HasKey("LaboratoireId");
+                    b.HasKey("Id");
 
                     b.ToTable("Laboratoires");
                 });
 
             modelBuilder.Entity("Examen.ApplicationCore.Domain.Patient", b =>
                 {
-                    b.Property<int>("CodePatient")
-                        .ValueGeneratedOnAdd()
+                    b.Property<string>("CodePatient")
                         .HasMaxLength(5)
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CodePatient"));
+                        .HasColumnType("nvarchar(5)");
 
                     b.Property<string>("EmailPatient")
                         .IsRequired()
@@ -176,39 +172,35 @@ namespace Examen.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Examen.ApplicationCore.Domain.Bilan", null)
+                        .WithMany("Analyses")
+                        .HasForeignKey("BilanCodeInfirmier", "BilanCodePatient", "BilanDatePrelevement");
+
                     b.Navigation("Laboratoire");
                 });
 
             modelBuilder.Entity("Examen.ApplicationCore.Domain.Bilan", b =>
                 {
-                    b.HasOne("Examen.ApplicationCore.Domain.Analyse", "Analyse")
-                        .WithMany("Bilans")
-                        .HasForeignKey("AnalyseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Examen.ApplicationCore.Domain.Infirmier", "Infirmier")
                         .WithMany("Bilans")
-                        .HasForeignKey("InfirmierId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasForeignKey("CodeInfirmier")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Examen.ApplicationCore.Domain.Patient", "Patient")
                         .WithMany("Bilans")
-                        .HasForeignKey("PatientId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasForeignKey("CodePatient")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Analyse");
 
                     b.Navigation("Infirmier");
 
                     b.Navigation("Patient");
                 });
 
-            modelBuilder.Entity("Examen.ApplicationCore.Domain.Analyse", b =>
+            modelBuilder.Entity("Examen.ApplicationCore.Domain.Bilan", b =>
                 {
-                    b.Navigation("Bilans");
+                    b.Navigation("Analyses");
                 });
 
             modelBuilder.Entity("Examen.ApplicationCore.Domain.Infirmier", b =>

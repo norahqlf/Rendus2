@@ -1,68 +1,81 @@
 ﻿using Examen.ApplicationCore.Domain;
-using Examen.ApplicationCore.Interfaces;
+using Examen.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Examen.ApplicationCore.Services
 {
-    public class BilanService : IBilanService
+    public class BilanService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly MedicalAnalysisContext _context;
 
-        public BilanService(IUnitOfWork unitOfWork)
+        public BilanService(MedicalAnalysisContext context)
         {
-            _unitOfWork = unitOfWork;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        // Method 1: Get the total amount of a Bilan, applying a 10% discount if the patient has more than 5 prélèvements
-        public decimal GetTotalAmount(int bilanId)
+        public decimal CalculateBilanTotalAmount(int codeInfirmier, string codePatient, DateTime datePrelevement)
         {
-            // Retrieve the Bilan entity
-            var bilan = _unitOfWork.Repository<Bilan>().Get(b => b.BilanId == bilanId);
-            if (bilan == null) throw new ArgumentException("Bilan not found");
+            // Retrieve the Bilan with its Analyses
+            var bilan = _context.Bilans
+                .Include(b => b.Analyses)
+                .FirstOrDefault(b => b.CodeInfirmier == codeInfirmier &&
+                                     b.CodePatient == codePatient &&
+                                     b.DatePrelevement == datePrelevement);
 
-            // Get the Patient associated with the Bilan
-            var patient = _unitOfWork.Repository<Patient>().Get(p => p.CodePatient == bilan.PatientId);
-            if (patient == null) throw new ArgumentException("Patient not found");
-
-            // Count how many prélèvements (analyses) the patient has had
-            var prelevementsCount = _unitOfWork.Repository<Bilan>()
-                .GetMany(b => b.PatientId == patient.CodePatient)
-                .Count();
-
-            // Retrieve the associated Analyse for the current Bilan
-            var analyse = _unitOfWork.Repository<Analyse>().Get(a => a.AnalyseId == bilan.AnalyseId);
-            if (analyse == null) throw new ArgumentException("Analyse not found");
-
-            // Calculate the total amount of the Bilan (Sum of analysis prices)
-            decimal totalAmount = analyse.PrixAnalyse;
-
-            // Apply 10% discount if the patient has more than 5 prélèvements
-            if (prelevementsCount > 5)
+            if (bilan == null)
             {
-                totalAmount -= totalAmount * 0.10m; // 10% discount
+                throw new Exception("Bilan not found.");
+            }
+
+            if (bilan.Analyses == null || !bilan.Analyses.Any())
+            {
+                return 0.0m; // Return 0 if no analyses
+            }
+
+            // Count prior Bilans for the patient (excluding the current one)
+            int priorBilansCount = _context.Bilans
+                .Count(b => b.CodePatient == codePatient &&
+                            b.DatePrelevement < datePrelevement);
+
+            // Calculate total amount from Analyses
+            decimal totalAmount = bilan.Analyses.Sum(a => a.Prix);
+
+            // Apply 10% discount if patient has more than 5 prior Bilans
+            if (priorBilansCount > 5)
+            {
+                totalAmount *= 0.9m; // 10% discount
             }
 
             return totalAmount;
         }
 
-        // Method 4: Get the date when a Bilan will be ready (when all its analyses are completed)
-        public DateTime GetReadyDateForBilan(int bilanId)
+        public DateTime GetBilanReadyDate(int codeInfirmier, string codePatient, DateTime datePrelevement)
         {
-            // Retrieve the Bilan entity
-            var bilan = _unitOfWork.Repository<Bilan>().Get(b => b.BilanId == bilanId);
-            if (bilan == null) throw new ArgumentException("Bilan not found");
+            // Retrieve the Bilan with its Analyses
+            var bilan = _context.Bilans
+                .Include(b => b.Analyses)
+                .FirstOrDefault(b => b.CodeInfirmier == codeInfirmier &&
+                                     b.CodePatient == codePatient &&
+                                     b.DatePrelevement == datePrelevement);
 
-            // Retrieve the associated Analyse for the current Bilan
-            var analyse = _unitOfWork.Repository<Analyse>().Get(a => a.AnalyseId == bilan.AnalyseId);
-            if (analyse == null) throw new ArgumentException("Analyse not found");
+            if (bilan == null)
+            {
+                throw new Exception("Bilan not found.");
+            }
 
-            // Estimate the ready date by adding the duration of the analysis to the prélèvement date
-            return bilan.DatePrelevement.AddHours(analyse.DureeResultat);
+            if (bilan.Analyses == null || !bilan.Analyses.Any())
+            {
+                throw new Exception("No analyses found for the specified Bilan.");
+            }
+
+            // Calculate the ready date for each analysis and find the latest
+            var latestReadyDate = bilan.Analyses
+                .Select(a => a.DatePrelevement.AddDays(a.DureeResultat))
+                .Max();
+
+            return latestReadyDate;
         }
     }
 }
-

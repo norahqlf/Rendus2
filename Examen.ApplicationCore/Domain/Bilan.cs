@@ -8,19 +8,14 @@ namespace Examen.ApplicationCore.Domain
 {
     public class Bilan
     {
-        public int BilanId { get; set; }
+        public int Id { get; set; }
         public DateTime DatePrelevement { get; set; }
         public string EmailMedecin { get; set; }
         public bool Paye { get; set; }
-
-        // Foreign Keys
-        public int PatientId { get; set; }
-        public int InfirmierId { get; set; }
-
-        // Navigation Properties
-        public Patient Patient { get; set; }
+        public int CodeInfirmier { get; set; }
         public Infirmier Infirmier { get; set; }
-        public ICollection<Analyse> Analyses { get; set; }  // Changed to ICollection for multiple analyses
+        public string CodePatient { get; set; }
+        public Patient Patient { get; set; }
+        public ICollection<Analyse> Analyses { get; set; }
     }
-
 }

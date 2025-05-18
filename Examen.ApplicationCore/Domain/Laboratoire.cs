@@ -8,11 +8,10 @@ namespace Examen.ApplicationCore.Domain
 {
     public class Laboratoire
     {
-        public int LaboratoireId { get; set; }
+        public int Id { get; set; }
         public string Intitule { get; set; }
         public string Localisation { get; set; }
-
-        // Navigation Property
         public ICollection<Analyse> Analyses { get; set; }
     }
+
 }

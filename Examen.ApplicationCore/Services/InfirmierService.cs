@@ -1,34 +1,36 @@
 ﻿using Examen.ApplicationCore.Domain;
-using Examen.ApplicationCore.Interfaces;
+using Examen.Infrastructure;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Examen.ApplicationCore.Services
 {
-    public class InfirmierService : IInfirmierService
+    public class InfirmierService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly MedicalAnalysisContext _context;
 
-        public InfirmierService(IUnitOfWork unitOfWork)
+        public InfirmierService(MedicalAnalysisContext context)
         {
-            _unitOfWork = unitOfWork;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public double GetInfirmierPercentageBySpecialty(Specialite specialite)
+        public double GetPercentageBySpecialite(Specialite specialite)
         {
-            // Get all infirmiers in the given specialty
-            var totalInfirmiers = _unitOfWork.Repository<Infirmier>().GetMany(i => i.Specialite == specialite).Count();
-            var totalInfirmiersCount = _unitOfWork.Repository<Infirmier>().GetAll().Count();
+            // Get total number of nurses
+            int totalInfirmiers = _context.Infirmiers.Count();
+            if (totalInfirmiers == 0)
+            {
+                return 0.0; // Return 0% if there are no nurses
+            }
 
-            if (totalInfirmiersCount == 0)
-                throw new InvalidOperationException("No infirmiers found.");
+            // Get number of nurses with the specified specialty
+            int infirmiersWithSpecialite = _context.Infirmiers
+                .Count(i => i.Specialite == specialite.ToString());
 
-            // Calculate the percentage
-            return (totalInfirmiers / (double)totalInfirmiersCount) * 100;
+            // Calculate percentage
+            double percentage = (double)infirmiersWithSpecialite / totalInfirmiers * 100;
+
+            return Math.Round(percentage, 2); // Round to 2 decimal places
         }
     }
 }
-
