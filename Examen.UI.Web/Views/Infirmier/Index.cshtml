@@ -1,0 +1,34 @@
+﻿// Examen.Web/Views/Infirmier/Index.cshtml
+@model IEnumerable<Examen.ApplicationCore.Domain.Infirmier>
+
+<h2>Liste des Infirmiers</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-success">Ajouter un Infirmier</a>
+</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Code Infirmier</th>
+            <th>Nom</th>
+            <th>Spécialité</th>
+            <th>Laboratoire</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var infirmier in Model)
+        {
+            <tr>
+                <td>@infirmier.CodeInfirmier</td>
+                <td>@infirmier.Nom</td>
+                <td>@infirmier.Specialite</td>
+                <td>@(infirmier.Laboratoire?.Intitule ?? "N/A")</td>
+                <td>
+                    <a asp-action="Patients" asp-route-codeInfirmier="@infirmier.CodeInfirmier">Patients</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

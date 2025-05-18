@@ -1,8 +1,5 @@
-﻿using System;
+﻿// Examen.ApplicationCore/Domain/Infirmier.cs
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Examen.ApplicationCore.Domain
 {
@@ -10,9 +7,9 @@ namespace Examen.ApplicationCore.Domain
     {
         public string CodeInfirmier { get; set; }
         public string Nom { get; set; }
-        public string Specialite { get; set; } // Added
-
+        public string Specialite { get; set; }
+        public int LaboratoireId { get; set; } // Added
+        public Laboratoire Laboratoire { get; set; } // Added
         public ICollection<Bilan> Bilans { get; set; }
     }
-
 }

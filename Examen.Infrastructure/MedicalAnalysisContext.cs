@@ -1,4 +1,5 @@
-﻿using Examen.ApplicationCore.Domain;
+﻿// Examen.Infrastructure/MedicalAnalysisContext.cs
+using Examen.ApplicationCore.Domain;
 using Examen.Infrastructure.Configurations;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -13,19 +14,21 @@ namespace Examen.Infrastructure
         public DbSet<Analyse> Analyses { get; set; }
         public DbSet<Bilan> Bilans { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=Romdhani;Trusted_Connection=True;");
-        }
+        public MedicalAnalysisContext(DbContextOptions<MedicalAnalysisContext> options) : base(options) { }
 
+        // Examen.Infrastructure/MedicalAnalysisContext.cs
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Laboratoire>()
-                .Property(l => l.Localisation)
-                .HasColumnName("AdresseLabo")
-                .HasMaxLength(50);
+            // Existing configurations...
+            modelBuilder.Entity<Infirmier>()
+                .HasOne(i => i.Laboratoire)
+                .WithMany()
+                .HasForeignKey(i => i.LaboratoireId);
 
-            modelBuilder.ApplyConfiguration(new BilanConfiguration());
+            // Update seed data for Infirmier
+            modelBuilder.Entity<Infirmier>().HasData(
+                new Infirmier { CodeInfirmier = "INF01", Nom = "Ahmed Ben Salah", Specialite = Specialite.Hematologie.ToString(), LaboratoireId = 1 }
+            );
         }
     }
 }

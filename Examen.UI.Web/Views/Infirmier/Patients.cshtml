@@ -1,0 +1,26 @@
+﻿// Examen.Web/Views/Infirmier/Patients.cshtml
+@model IEnumerable<Examen.ApplicationCore.Domain.Patient>
+
+<h2>Patients pour Infirmier @ViewBag.CodeInfirmier</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Code Patient</th>
+            <th>Nom Complet</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var patient in Model)
+        {
+            <tr>
+                <td>@patient.CodePatient</td>
+                <td>@patient.NomComplet</td>
+                <td>@patient.EmailPatient</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Index" class="btn btn-primary">Retour à la liste des Infirmiers</a>
